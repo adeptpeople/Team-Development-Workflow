@@ -1,0 +1,68 @@
+{
+  "mcpServers": {
+    "jira": {
+      "command": "node",
+      "args": ["${PROJECT_ROOT}/tools/mcp/jira-mcp/index.js"],
+      "env": {
+        "JIRA_BASE_URL": "${JIRA_BASE_URL}",
+        "JIRA_TOKEN": "${JIRA_TOKEN}",
+        "JIRA_PROJECT_KEY": "${JIRA_PROJECT_KEY}"
+      },
+      "description": "Jira integration — read/write issues, link PRs to tickets, post status updates",
+      "trust": "project"
+    },
+    "github": {
+      "command": "node",
+      "args": ["${PROJECT_ROOT}/tools/mcp/github-mcp/index.js"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "GITHUB_ORG": "${GITHUB_ORG}",
+        "GITHUB_REPO": "${GITHUB_REPO}"
+      },
+      "description": "GitHub integration — PRs, issues, code review comments, CI status",
+      "trust": "project"
+    },
+    "slack": {
+      "command": "node",
+      "args": ["${PROJECT_ROOT}/tools/mcp/slack-mcp/index.js"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_SIGNING_SECRET": "${SLACK_SIGNING_SECRET}",
+        "SLACK_DEFAULT_CHANNEL": "${SLACK_DEFAULT_CHANNEL}"
+      },
+      "description": "Slack integration — post deployment notifications, incident alerts, PR review pings",
+      "trust": "project"
+    },
+    "datadog": {
+      "command": "python",
+      "args": ["${PROJECT_ROOT}/tools/mcp/datadog_mcp.py"],
+      "env": {
+        "DD_API_KEY": "${DD_API_KEY}",
+        "DD_APP_KEY": "${DD_APP_KEY}",
+        "DD_SITE": "${DD_SITE}"
+      },
+      "description": "Datadog integration — query metrics, fetch logs, inspect monitors and dashboards",
+      "trust": "project"
+    },
+    "postgres-readonly": {
+      "command": "node",
+      "args": ["${PROJECT_ROOT}/tools/mcp/pg-readonly-mcp/index.js"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_READONLY_URL}"
+      },
+      "description": "Read-only Postgres access for schema inspection and query analysis. No writes.",
+      "trust": "project"
+    }
+  },
+  "_governance": {
+    "rules": [
+      "All server credentials must come from environment variables — no hardcoded values",
+      "Each server has 'trust: project' — available to all contributors on this repo",
+      "Personal/experimental servers belong in ~/.claude.json, not here",
+      "Adding a new server requires team review and update to docs/mcp-servers.md",
+      "Servers with write access (jira, github, slack) require explicit user confirmation before mutations"
+    ],
+    "credential_expansion": "Variables are expanded from the shell environment at session start. Use .env (gitignored) for local development. CI injects secrets via the secrets manager.",
+    "audit": "All MCP tool invocations are logged to .claude/audit/mcp-calls.jsonl in development mode"
+  }
+}
